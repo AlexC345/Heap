@@ -10,9 +10,10 @@ class Node{
 		~Node();
 		Node* getRight();
 		Node* getLeft();
-		void setRight();
-		void setLeft();
+		void setRight(Node*);
+		void setLeft(Node*);
 		int getValue();
+		void setValue(int);
 	private:
 		int value;
 		Node* right;

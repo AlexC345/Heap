@@ -30,3 +30,7 @@ void Node::setLeft(Node* input){
 int Node::getValue(){
 	return value;
 }
+
+void Node::setValue(int input){
+	value = input;
+}
