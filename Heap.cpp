@@ -3,9 +3,10 @@
 #include <cmath>
 #include "Node.h"
 #include "fstream"
+#include "iterator"
 using namespace std;
 
-void add(int value, Node** treeArray){
+void add(int value, Node** treeArray){//adds a value
 	//adding newNode to next available index
 	Node *newNode = new Node(value);
 	if (treeArray[1] == NULL){ //root is empty case
@@ -47,10 +48,73 @@ void add(int value, Node** treeArray){
 	}
 }
 
-void Delete(Node** treeArray);
-void DeleteAll(Node** treeArray);
+void Delete(Node** treeArray, int curIndex){//more like a sorting function, recursively sorts the tree
+	int leftVal = 0;
+	int rightVal = 0;
+	bool foundLeftVal = false;
+	bool foundRightVal = false;
+	int curVal = treeArray[curIndex]->getValue();
+	if (treeArray[curIndex * 2] != NULL){
+		leftVal = treeArray[curIndex * 2]->getValue();
+		foundLeftVal = true;
+	}
+	if (treeArray[curIndex * 2 + 1] != NULL){
+		rightVal = treeArray[curIndex * 2 + 1]->getValue();
+		foundRightVal = true;
+	}
 
-void printTree(Node** treeArray, int lastIndex, int currentIndex, int depth){
+	if (foundLeftVal){
+		if (!foundRightVal){
+			if (leftVal > curVal){
+				treeArray[curIndex * 2]->setValue(curVal);//swap values and recursively run function
+				treeArray[curIndex]->setValue(leftVal);
+				Delete(treeArray, curIndex * 2);
+			}
+		}
+		else{
+			if (leftVal > curVal or rightVal > curVal){
+				if (leftVal > rightVal){
+					treeArray[curIndex * 2]->setValue(curVal); //swap values and recursively run function
+					treeArray[curIndex]->setValue(leftVal);
+					Delete(treeArray, curIndex * 2);
+				}
+				else{
+					treeArray[curIndex * 2 + 1]->setValue(curVal); //swap values and recursively run function
+					treeArray[curIndex]->setValue(rightVal);
+					Delete(treeArray, curIndex * 2 + 1);
+				}
+			}
+		}
+	}
+}
+
+int findLastIndex(Node** treeArray){//gets the last index of the tree
+	int searchIndex = 1;
+	while (treeArray[searchIndex] != NULL){
+		searchIndex++;
+	}
+	return searchIndex;
+}
+
+void DeleteAll(Node** treeArray){//deletes every node in the tree
+	while (treeArray[1] != NULL){
+		cout << treeArray[1]->getValue() << " ";
+		delete treeArray[1]; //delete root
+		int lastIndex = findLastIndex(treeArray)-1;
+		if (lastIndex != 1){
+        		Node* lastNode = treeArray[lastIndex]; //find last node
+        		treeArray[1] = lastNode; //insert last node to root position
+			treeArray[lastIndex] = NULL;
+			Delete(treeArray, 1);
+		}
+		else{
+			treeArray[1] = NULL;
+		}
+	}
+	cout << '\n';
+}
+
+void printTree(Node** treeArray, int lastIndex, int currentIndex, int depth){//prints the tree in sideways format
 	if ((currentIndex * 2) + 1 < lastIndex){
 		printTree(treeArray, lastIndex, (currentIndex * 2) + 1, depth + 1); //right recursion
 	}
@@ -65,20 +129,12 @@ void printTree(Node** treeArray, int lastIndex, int currentIndex, int depth){
 	}
 }
 
-int findLastIndex(Node** treeArray){
-	int searchIndex = 1;
-	while (treeArray[searchIndex] != NULL){
-		searchIndex++;
-	}
-	return searchIndex;
-}
-
 int main(){
 	Node** tree = new Node*[101];
-	for (int i = 0; i < 101; i++){
+	for (int i = 0; i < 101; i++){//clears tree
 		tree[i] = NULL;
 	}
-	char addc[] = "ADD";
+	char addc[] = "ADD";//all the command variables
 	char delc[] = "DELETE";
 	char delAllc[] = "DELETEALL";
 	char quitc[] = "QUIT";
@@ -91,6 +147,9 @@ int main(){
 
 	char addfName[1000];
 
+	int delValue;
+	int delIndex;
+
 	while(!quitVar){
 		cout << "Enter a command: (ADD, DELETE, DELETEALL, QUIT, PRINT, ADDF) ";
 		cin >> command;
@@ -102,14 +161,26 @@ int main(){
 			add(addValue, tree);
 			cout << "Added number!" << endl;
 		}
-		else if (strcmp(command, delc) == 0){
-			//del
+		else if (strcmp(command, delc) == 0){//delete command
+			cout << "Delete number: ";
+			if (tree[1] != NULL){
+				cout << "Root: " << tree[1]->getValue() << endl;
+        			Node* lastNode = tree[findLastIndex(tree)-1]; //find last node
+        			tree[1] = NULL; //delete root
+        			tree[1] = lastNode; //insert last node to root position
+				tree[findLastIndex(tree)-1] = NULL;
+				Delete(tree, 1); //not really delete, more like rearange tree, but whatever
+				cout << "Deleted root!" << endl;
+			}
 		}
-		else if (strcmp(command, delAllc) == 0){
-			//delAll
+		else if (strcmp(command, delAllc) == 0){ //deleteAll command
+			DeleteAll(tree);
 		}
-		else if (strcmp(command, quitc) == 0){
+		else if (strcmp(command, quitc) == 0){//quit command
 			cout << "Quitting program." << endl;
+			for (int i = 0; i < 101; i++){//clears the tree
+				delete tree[i];
+			}
 			quitVar = true;
 		}
 		else if (strcmp(command, printc) == 0){//print command
@@ -122,7 +193,7 @@ int main(){
 			*/
 			printTree(tree, findLastIndex(tree), 1, 0);	
 		}
-		else if (strcmp(command, addfc) == 0){
+		else if (strcmp(command, addfc) == 0){//add file command
 			cout << "Enter file name: (include the .txt) ";
 			cin >> addfName;
 
@@ -139,7 +210,7 @@ int main(){
 				cout << "Added numbers!" << endl;
 			}
 		}
-		else{
+		else{//if you entered an invalid input:
 			cout << "Invalid input." << endl;
 		}
 	}

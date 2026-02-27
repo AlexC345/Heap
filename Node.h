@@ -3,9 +3,9 @@
 #include <iostream>
 #include <cstring>
 using namespace std;
-
+//header guard and includes
 class Node{
-	public:
+	public://public constructor, destructor, and functions
 		Node(int);
 		~Node();
 		Node* getRight();
@@ -14,9 +14,10 @@ class Node{
 		void setLeft(Node*);
 		int getValue();
 		void setValue(int);
-	private:
+	private://private variables
 		int value;
 		Node* right;
 		Node* left;
 };
 #endif
+//header guard end
